@@ -2597,6 +2597,18 @@ files = [
 ]
 
 [[package]]
+name = "pydf"
+version = "12"
+description = "colourised df(1)-clone"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "pydf-12-cp27-none-macosx_10_10_x86_64.whl", hash = "sha256:99cfbc6c9bb2cc366bfcc82f5123bd60cf6f0b7d7b603e3d3e671064371b85d5"},
+    {file = "pydf-12.tar.gz", hash = "sha256:7f47a7c3abfceb1ac04fc009ded538df1ae449c31203962a1471a4eb3bf21439"},
+]
+
+[[package]]
 name = "pyflakes"
 version = "3.1.0"
 description = "passive checker of Python programs"
@@ -3614,4 +3626,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.9"
-content-hash = "c71d437ff769dde05832711ff12d6194c8c12e64a1fb9aafcd061ec0ee7a1fe6"
+content-hash = "b523b0d521c398f3fd1ad87624e8ae43377075bbacd79c16eec83baa54d31a59"

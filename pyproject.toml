@@ -33,6 +33,7 @@ jupyter = "^1.0.0"
 matplotlib = "^3.7.0"
 PyYAML = "^6.0.0"
 pypdf = "^6.1.0"
+pydf = "^12"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
