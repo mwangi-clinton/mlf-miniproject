@@ -111,3 +111,64 @@ def view(data: Union[pd.DataFrame, Any]) -> None:
 def labelled(data: Union[pd.DataFrame, Any]) -> Union[pd.DataFrame, Any]:
     """Provide a labelled set of data ready for supervised learning."""
     raise NotImplementedError
+
+
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalizes a DataFrame's column names by cleaning and standardizing them.
+
+    This function performs the following steps on the column names:
+    1. Removes leading and trailing whitespace.
+    2. Converts all characters to lowercase.
+    3. Replaces spaces and hyphens with a single underscore.
+    4. Removes any characters that are not alphanumeric or underscores.
+
+    Args:
+        df (pd.DataFrame): The input pandas DataFrame with columns to normalize.
+
+    Returns:
+        pd.DataFrame: The DataFrame with its columns normalized.
+
+    Raises:
+        TypeError: If the input is not a pandas DataFrame.
+        Exception: Catches any unexpected errors during the column normalization process.
+
+    Example:
+        >>> import pandas as pd
+        >>> data = {'Col Name 1': [1, 2], ' Another-Col ': [3, 4], 'yet_another--col': [5, 6]}
+        >>> df = pd.DataFrame(data)
+        >>> normalize_columns(df)
+           col_name_1  another_col  yet_another_col
+        0           1            3                5
+        1           2            4                6
+    """
+    logger.info("Starting column normalization.")
+    try:
+        # Check if the input is a DataFrame
+        if not isinstance(df, pd.DataFrame):
+            logger.error(f"Invalid input type: {type(df)}. Expected pandas.DataFrame.")
+            raise TypeError("Input must be a pandas DataFrame.")
+
+        # Original columns
+        original_cols = df.columns.tolist()
+        logger.debug(f"Original columns: {original_cols}")
+
+        # Normalization
+        df.columns = (
+            df.columns.str.strip()
+            .str.lower()
+            .str.replace(
+                r"[\s-]+", "_", regex=True
+            )  # Replaces one or more spaces or hyphens with a single underscore
+            .str.replace(r"[^\w_]", "", regex=True)
+        )
+
+        # New columns
+        new_cols = df.columns.tolist()
+        logger.info(f"Column normalization completed. New columns: {new_cols}")
+
+        return df
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred during column normalization: {e}")
+        raise
