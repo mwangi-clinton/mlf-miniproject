@@ -1,2 +1,15 @@
 *.ipynb_checkpoints
+
+
+# Python
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
