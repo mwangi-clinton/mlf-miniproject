@@ -14,7 +14,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -36,6 +35,8 @@ PyYAML = "^6.0.0"
 pypdf = "^6.1.0"
 pydf = "^12"
 seaborn = "^0.13.2"
+scikit-learn = "^1.7.2"  # Added back
+statsmodels = "^0.14.5"  # Added back
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
@@ -98,7 +99,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py310', 'py311', 'py312']  # Fixed to match your Python version
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -115,7 +116,7 @@ extend-exclude = '''
 '''
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"  # Fixed to match your Python version
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -138,5 +139,8 @@ module = [
     "bokeh.*",
     "geopandas.*",
     "shapely.*",
+    "seaborn.*",
+    "sklearn.*",      # Added for scikit-learn
+    "statsmodels.*",  # Added for statsmodels
 ]
 ignore_missing_imports = true
