@@ -35,6 +35,8 @@ PyYAML = "^6.0.0"
 pypdf = "^6.1.0"
 pydf = "^12"
 seaborn = "^0.13.2"
+scikit-learn = "^1.7.2"
+statsmodels = "^0.14.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
@@ -138,5 +140,7 @@ module = [
     "geopandas.*",
     "shapely.*",
     "seaborn.*",
+    "sklearn.*",           # Added scikit-learn
+    "statsmodels.*",       # Added statsmodels
 ]
 ignore_missing_imports = true
