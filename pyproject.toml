@@ -26,7 +26,8 @@ packages = [{include = "fynesse"}]
 include = ["fynesse/defaults.yml"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
+geopandas = "^1.1.1"
 pandas = "^2.0.0"
 numpy = "^1.24.0"
 jupyter = "^1.0.0"
@@ -134,5 +135,7 @@ module = [
     "matplotlib.*",
     "jupyter.*",
     "bokeh.*",
+    "geopandas.*",
+    "shapely.*",
 ]
 ignore_missing_imports = true

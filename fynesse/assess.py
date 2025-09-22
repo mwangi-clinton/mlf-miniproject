@@ -2,6 +2,9 @@ from typing import Any, Union
 import pandas as pd
 import logging
 import matplotlib.pyplot as plt
+import geopandas as gpd
+from shapely.geometry import Point
+
 
 from .config import *
 from . import access
@@ -364,4 +367,95 @@ def plot_barh_counts(
 
     except Exception as e:
         logger.error(f"An error occurred while plotting bar chart: {e}")
+        raise
+
+
+def plot_facilities_distribution(
+    shapefile_path: str,
+    facilities_df: pd.DataFrame,
+    lat_col: str = "latitude",
+    lon_col: str = "longitude",
+    county_color: str = "none",
+    county_edgecolor: str = "red",
+    point_color: str = "green",
+    point_size: int = 5,
+    point_alpha: float = 0.7,
+    title: str = "Health Facilities Distribution by Counties",
+    figsize: tuple = (8, 8),
+) -> None:
+    """
+    Plots health facility locations on top of county boundaries from a shapefile.
+
+    Args:
+        shapefile_path (str): Path to the shapefile containing county boundaries.
+        facilities_df (pd.DataFrame): DataFrame with facility coordinates.
+        lat_col (str, optional): Column name for latitude. Defaults to "latitude".
+        lon_col (str, optional): Column name for longitude. Defaults to "longitude".
+        county_color (str, optional): Fill color for counties. Defaults to "none".
+        county_edgecolor (str, optional): Edge color for counties. Defaults to "red".
+        point_color (str, optional): Color of facility points. Defaults to "green".
+        point_size (int, optional): Marker size for facility points. Defaults to 5.
+        point_alpha (float, optional): Transparency for facility points. Defaults to 0.7.
+        title (str, optional): Title for the plot. Defaults to
+            "Health Facilities Distribution by Counties".
+        figsize (tuple, optional): Size of the plot (width, height). Defaults to (8, 8).
+
+    Returns:
+        None: Displays the map plot.
+
+    Raises:
+        FileNotFoundError: If the shapefile path is invalid.
+        KeyError: If latitude/longitude columns are missing in the DataFrame.
+        Exception: For any unexpected errors during plotting.
+
+    Example:
+        >>> plot_facilities_distribution(
+        ...     "County.shp", df_health_facilities,
+        ...     lat_col="latitude", lon_col="longitude"
+        ... )
+    """
+    logger.info("Starting facilities distribution plotting.")
+
+    try:
+        # Load shapefile
+        logger.debug(f"Reading shapefile from {shapefile_path}")
+        counties = gpd.read_file(shapefile_path)
+
+        # Check coordinate columns
+        if lat_col not in facilities_df.columns or lon_col not in facilities_df.columns:
+            logger.error(
+                f"Missing required columns: {lat_col} and {lon_col} in facilities_df"
+            )
+            raise KeyError(f"Missing required columns: {lat_col}, {lon_col}")
+
+        # Convert facilities to GeoDataFrame
+        logger.debug("Converting facilities DataFrame to GeoDataFrame.")
+        points = gpd.GeoDataFrame(
+            facilities_df,
+            geometry=[
+                Point(xy) for xy in zip(facilities_df[lon_col], facilities_df[lat_col])
+            ],
+            crs="EPSG:4326",
+        )
+
+        # Plot
+        fig, ax = plt.subplots(figsize=figsize)
+        counties.plot(
+            ax=ax, color=county_color, edgecolor=county_edgecolor, linewidth=1.5
+        )
+        points.plot(ax=ax, color=point_color, markersize=point_size, alpha=point_alpha)
+
+        plt.title(title)
+        plt.xlabel("Longitude")
+        plt.ylabel("Latitude")
+        plt.tight_layout()
+        plt.show()
+
+        logger.info("Facilities distribution plotted successfully.")
+
+    except FileNotFoundError as fnf_err:
+        logger.error(f"Shapefile not found: {fnf_err}")
+        raise
+    except Exception as e:
+        logger.error(f"An error occurred while plotting facilities distribution: {e}")
         raise
