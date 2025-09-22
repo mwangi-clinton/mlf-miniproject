@@ -197,7 +197,7 @@ def extract_census_data(
         ): {
             "headers": [
                 "Region",
-                "Region_population",
+                "Population",
                 "Households",
                 "Average Household Size",
             ],
