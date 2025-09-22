@@ -4,7 +4,8 @@ import logging
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from shapely.geometry import Point
-
+import seaborn as sns
+import numpy as np
 
 from .config import *
 from . import access
@@ -458,4 +459,161 @@ def plot_facilities_distribution(
         raise
     except Exception as e:
         logger.error(f"An error occurred while plotting facilities distribution: {e}")
+        raise
+
+
+sns.set(style="whitegrid")
+
+
+def plot_health_facility_analysis(df: pd.DataFrame, plot_type: str = "heatmap") -> None:
+    """
+    Generate exploratory plots for health facility data.
+
+    Available plot types:
+    - "heatmap"       : Correlation heatmap of numeric columns
+    - "scatter"       : Facilities vs population density (linear scale)
+    - "log_scatter"   : Facilities vs population density (log-log scale)
+    - "boxplot"       : Population density distribution by facility level
+    - "histogram"     : Facilities per 10,000 population
+
+    Args:
+        df (pd.DataFrame): Input dataframe with health facility data.
+        plot_type (str, optional): The plot type to generate.
+                                   Defaults to "heatmap".
+
+    Returns:
+        None
+
+    Raises:
+        TypeError: If input is not a pandas DataFrame.
+        ValueError: If plot_type is not recognized.
+
+    Example:
+        >>> plot_health_facility_analysis(merged_df, plot_type="scatter")
+    """
+    try:
+        if not isinstance(df, pd.DataFrame):
+            logger.error(f"Invalid input type: {type(df)}. Expected pandas.DataFrame.")
+            raise TypeError("Input must be a pandas DataFrame.")
+
+        logger.info(f"Generating plot: {plot_type}")
+
+        # Ensure facility_count exists
+        if "facility_count" not in df.columns and {"county", "subcounty"}.issubset(
+            df.columns
+        ):
+            facility_counts = (
+                df.groupby(["county", "subcounty"])
+                .size()
+                .reset_index(name="facility_count")
+            )
+            df = df.merge(facility_counts, on=["county", "subcounty"], how="left")
+
+        # Precompute correlations
+        preferred = [
+            "facility_count",
+            "population_x",
+            "land_area_sq_km",
+            "population_density_no_per_sq_km",
+            "male",
+            "female",
+            "intersex",
+            "total",
+            "households",
+            "average_household_size",
+            "facility_level",
+        ]
+        cols_for_corr = [c for c in preferred if c in df.columns]
+
+        if plot_type == "heatmap":
+            corr_df = df[cols_for_corr].corr(method="pearson")
+            plt.figure(figsize=(9, 7))
+            sns.heatmap(corr_df, annot=True, fmt=".2f", cmap="vlag", center=0)
+            plt.title("Correlation matrix — Health Facilities Data")
+            plt.tight_layout()
+            plt.show()
+
+        elif plot_type == "scatter":
+            scatter_df = df.dropna(
+                subset=["facility_count", "population_density_no_per_sq_km"]
+            )
+            plt.figure(figsize=(8, 6))
+            sns.regplot(
+                data=scatter_df,
+                x="population_density_no_per_sq_km",
+                y="facility_count",
+                scatter_kws={"s": 30, "alpha": 0.6},
+                line_kws={"color": "red"},
+            )
+            plt.xlabel("Population density (per sq. km)")
+            plt.ylabel("Number of facilities")
+            plt.title("Facilities vs Population Density (linear)")
+            plt.tight_layout()
+            plt.show()
+
+        elif plot_type == "log_scatter":
+            scatter_df = df.dropna(
+                subset=["facility_count", "population_density_no_per_sq_km"]
+            ).copy()
+            scatter_df["log_pop_density"] = np.log1p(
+                scatter_df["population_density_no_per_sq_km"]
+            )
+            scatter_df["log_facility_count"] = np.log1p(scatter_df["facility_count"])
+            plt.figure(figsize=(8, 6))
+            sns.regplot(
+                data=scatter_df,
+                x="log_pop_density",
+                y="log_facility_count",
+                scatter_kws={"s": 30, "alpha": 0.6},
+                line_kws={"color": "red"},
+            )
+            plt.xlabel("log(1 + population density)")
+            plt.ylabel("log(1 + facility count)")
+            plt.title("Facilities vs Population Density (log-log)")
+            plt.tight_layout()
+            plt.show()
+
+        elif plot_type == "boxplot":
+            if "facility_level" not in df.columns:
+                logger.error("facility_level column not found in dataframe.")
+                raise KeyError("facility_level column required for boxplot.")
+            box_df = df.dropna(
+                subset=["facility_level", "population_density_no_per_sq_km"]
+            )
+            plt.figure(figsize=(10, 6))
+            sns.boxplot(
+                data=box_df, x="facility_level", y="population_density_no_per_sq_km"
+            )
+            plt.xlabel("Facility level")
+            plt.ylabel("Population density (per sq. km)")
+            plt.title("Population density distribution by facility level")
+            plt.tight_layout()
+            plt.show()
+
+        elif plot_type == "histogram":
+            if "facility_count" in df.columns and "population_x" in df.columns:
+                df["facilities_per_10k"] = (
+                    df["facility_count"] / df["population_x"] * 10000
+                )
+                plt.figure(figsize=(8, 6))
+                sns.histplot(df["facilities_per_10k"].dropna(), bins=40, kde=True)
+                plt.xlabel("Facilities per 10,000 population")
+                plt.title("Distribution of facilities per 10k population")
+                plt.tight_layout()
+                plt.show()
+            else:
+                logger.error("facility_count and population_x required for histogram.")
+                raise KeyError("facility_count and population_x columns required.")
+
+        else:
+            logger.error(f"Unknown plot_type: {plot_type}")
+            raise ValueError(
+                f"Invalid plot_type '{plot_type}'. "
+                f"Choose from ['heatmap','scatter','log_scatter','boxplot','histogram']."
+            )
+
+        logger.info(f"Plot {plot_type} generated successfully.")
+
+    except Exception as e:
+        logger.error(f"An error occurred while generating plot: {e}")
         raise
