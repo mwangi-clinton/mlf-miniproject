@@ -211,7 +211,7 @@ def extract_census_data(
             "headers": [
                 "Region",
                 "Population",
-                "Land Area (Sq. Km)",                
+                "Land Area (Sq. Km)",
                 "Population Density (No. per Sq. Km)",
             ],
             "expected_columns": 3,

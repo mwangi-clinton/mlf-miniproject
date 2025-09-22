@@ -172,3 +172,135 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     except Exception as e:
         logger.error(f"An unexpected error occurred during column normalization: {e}")
         raise
+
+
+kenya_counties = [
+    "Mombasa",
+    "Kwale",
+    "Kilifi",
+    "Tana River",
+    "Lamu",
+    "Taita/Taveta",
+    "Garissa",
+    "Wajir",
+    "Mandera",
+    "Marsabit",
+    "Isiolo",
+    "Meru",
+    "Tharaka-Nithi",
+    "Embu",
+    "Kitui",
+    "Machakos",
+    "Makueni",
+    "Nyandarua",
+    "Nyeri",
+    "Kirinyaga",
+    "Murang'a",
+    "Kiambu",
+    "Turkana",
+    "West Pokot",
+    "Samburu",
+    "Trans Nzoia",
+    "Uasin Gishu",
+    "Elgeyo/Marakwet",
+    "Nandi",
+    "Baringo",
+    "Laikipia",
+    "Nakuru",
+    "Narok",
+    "Kajiado",
+    "Kericho",
+    "Bomet",
+    "Kakamega",
+    "Vihiga",
+    "Bungoma",
+    "Busia",
+    "Siaya",
+    "Kisumu",
+    "Homa Bay",
+    "Migori",
+    "Kisii",
+    "Nyamira",
+    "Nairobi City",
+]
+
+
+def split_region_to_county_subcounty(
+    df: pd.DataFrame, region_column: str = "region"
+) -> pd.DataFrame:
+    """
+    Splits a hierarchical 'region' column into 'county' and 'subcounty' columns for Kenya.
+
+    Logic:
+    - 'Kenya' represents the country level (county=None, subcounty=None)
+    - Any name in the kenya_counties list represents a county (county=name, subcounty=None)
+    - All other names are treated as subcounties (county=most recent county, subcounty=name)
+
+    Args:
+        df (pd.DataFrame): Input DataFrame containing a 'region' column.
+        region_column (str, optional): Name of the column containing hierarchical region
+        names. Defaults to 'region'.
+
+    Returns:
+        pd.DataFrame: DataFrame with 'county' and 'subcounty' columns, 'region' column dropped.
+
+    Raises:
+        TypeError: If the input is not a pandas DataFrame.
+        KeyError: If the specified region_column does not exist in the DataFrame.
+        Exception: For any unexpected errors.
+
+    Example:
+        >>> data = {'region': ['Kenya', 'Nairobi City', 'Westlands']}
+        >>> df = pd.DataFrame(data)
+        >>> split_region_to_county_subcounty(df)
+            county       subcounty
+        0     None           None
+        1  Nairobi City       None
+        2  Nairobi City   Westlands
+    """
+    logger.info("Starting split of region into county and subcounty.")
+
+    try:
+        if not isinstance(df, pd.DataFrame):
+            logger.error(f"Invalid input type: {type(df)}. Expected pandas.DataFrame.")
+            raise TypeError("Input must be a pandas DataFrame.")
+
+        if region_column not in df.columns:
+            logger.error(f"Column '{region_column}' not found in DataFrame.")
+            raise KeyError(f"Column '{region_column}' does not exist in DataFrame.")
+
+        df_copy = df.copy()
+        df_copy["county"] = None
+        df_copy["subcounty"] = None
+
+        current_county = None
+
+        for idx, row in df_copy.iterrows():
+            region_name = row[region_column]
+
+            if region_name == "Kenya":
+                df_copy.at[idx, "county"] = None
+                df_copy.at[idx, "subcounty"] = None
+                current_county = None
+                logger.debug(f"Row {idx}: Country level detected.")
+
+            elif region_name in kenya_counties:
+                df_copy.at[idx, "county"] = region_name
+                df_copy.at[idx, "subcounty"] = None
+                current_county = region_name
+                logger.debug(f"Row {idx}: County detected - {region_name}.")
+
+            else:
+                df_copy.at[idx, "county"] = current_county
+                df_copy.at[idx, "subcounty"] = region_name
+                logger.debug(
+                    f"Row {idx}: Subcounty detected - {region_name}, "
+                    " assigned to county {current_county}."
+                )
+
+        logger.info("Region split completed successfully.")
+        return df_copy.drop(columns=[region_column])
+
+    except Exception as e:
+        logger.error(f"An error occurred while splitting region: {e}")
+        raise
