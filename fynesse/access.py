@@ -210,8 +210,8 @@ def extract_census_data(
         "Distribution of Population by Land Area and Population Density by Sub-County": {
             "headers": [
                 "Region",
-                "Land Area (Sq. Km)",
                 "Population",
+                "Land Area (Sq. Km)",                
                 "Population Density (No. per Sq. Km)",
             ],
             "expected_columns": 3,
