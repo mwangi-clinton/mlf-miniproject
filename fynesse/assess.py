@@ -1,6 +1,7 @@
 from typing import Any, Union
 import pandas as pd
 import logging
+from matplotlib.pyplot import plt
 
 from .config import *
 from . import access
@@ -303,4 +304,61 @@ def split_region_to_county_subcounty(
 
     except Exception as e:
         logger.error(f"An error occurred while splitting region: {e}")
+        raise
+
+def plot_barh_counts(
+    counts_series: pd.Series,
+    title: str = 'Bar Chart',
+    xlabel: str = 'Count',
+    ylabel: str = 'Category',
+    color: str = 'skyblue'
+) -> None:
+    """
+    Plots a horizontal bar chart for a pandas Series obtained from value_counts().
+
+    This function generates a horizontal bar chart with the highest values at the top.
+
+    Args:
+        counts_series (pd.Series): A pandas Series, typically from value_counts().
+        title (str, optional): Chart title. Defaults to 'Bar Chart'.
+        xlabel (str, optional): Label for the x-axis. Defaults to 'Count'.
+        ylabel (str, optional): Label for the y-axis. Defaults to 'Category'.
+        color (str or list, optional): Color of the bars. 
+        Can be a single color or a list of colors. Defaults to 'skyblue'.
+
+    Returns:
+        None: Displays the plot.
+
+    Raises:
+        TypeError: If counts_series is not a pandas Series.
+        Exception: Catches any unexpected errors during plotting.
+
+    Example:
+        >>> import pandas as pd
+        >>> data = ['A', 'B', 'A', 'C', 'B', 'A']
+        >>> counts = pd.Series(data).value_counts()
+        >>> plot_barh_counts(counts, title="Example Chart", color="lightgreen")
+    """
+    logger.info("Starting horizontal bar chart plotting.")
+    
+    try:
+        if not isinstance(counts_series, pd.Series):
+            logger.error(f"Invalid input type: {type(counts_series)}. Expected pandas.Series.")
+            raise TypeError("counts_series must be a pandas Series.")
+
+        logger.debug(f"Counts series:\n{counts_series}")
+
+        plt.figure(figsize=(10, 8))
+        counts_series.plot(kind='barh', color=color)
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.gca().invert_yaxis()  # highest values at the top
+        plt.tight_layout()
+        plt.show()
+
+        logger.info("Horizontal bar chart plotted successfully.")
+
+    except Exception as e:
+        logger.error(f"An error occurred while plotting bar chart: {e}")
         raise
