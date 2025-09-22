@@ -196,8 +196,8 @@ def extract_census_data(
             "Household Size by Sub-County"
         ): {
             "headers": [
-                "Household_Region",
-                "Household_Population",
+                "Region",
+                "Population",
                 "Households",
                 "Average Household Size",
             ],
