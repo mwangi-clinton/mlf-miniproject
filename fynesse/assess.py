@@ -1,7 +1,7 @@
 from typing import Any, Union
 import pandas as pd
 import logging
-from matplotlib.pyplot import plt
+import matplotlib.pyplot as plt
 
 from .config import *
 from . import access
@@ -306,12 +306,13 @@ def split_region_to_county_subcounty(
         logger.error(f"An error occurred while splitting region: {e}")
         raise
 
+
 def plot_barh_counts(
     counts_series: pd.Series,
-    title: str = 'Bar Chart',
-    xlabel: str = 'Count',
-    ylabel: str = 'Category',
-    color: str = 'skyblue'
+    title: str = "Bar Chart",
+    xlabel: str = "Count",
+    ylabel: str = "Category",
+    color: str = "skyblue",
 ) -> None:
     """
     Plots a horizontal bar chart for a pandas Series obtained from value_counts().
@@ -323,7 +324,7 @@ def plot_barh_counts(
         title (str, optional): Chart title. Defaults to 'Bar Chart'.
         xlabel (str, optional): Label for the x-axis. Defaults to 'Count'.
         ylabel (str, optional): Label for the y-axis. Defaults to 'Category'.
-        color (str or list, optional): Color of the bars. 
+        color (str or list, optional): Color of the bars.
         Can be a single color or a list of colors. Defaults to 'skyblue'.
 
     Returns:
@@ -340,16 +341,18 @@ def plot_barh_counts(
         >>> plot_barh_counts(counts, title="Example Chart", color="lightgreen")
     """
     logger.info("Starting horizontal bar chart plotting.")
-    
+
     try:
         if not isinstance(counts_series, pd.Series):
-            logger.error(f"Invalid input type: {type(counts_series)}. Expected pandas.Series.")
+            logger.error(
+                f"Invalid input type: {type(counts_series)}. Expected pandas.Series."
+            )
             raise TypeError("counts_series must be a pandas Series.")
 
         logger.debug(f"Counts series:\n{counts_series}")
 
         plt.figure(figsize=(10, 8))
-        counts_series.plot(kind='barh', color=color)
+        counts_series.plot(kind="barh", color=color)
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
